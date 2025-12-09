@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Management Award 2025</title>
+    
+    <!-- Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <!-- React 18 UMD (No Import Map to avoid conflicts) -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.0/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- 1. ICONS ---
+        const Icons = {
+            ShieldCheck: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            ),
+            LogOut: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            ),
+            User: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ),
+            Loader2: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            ),
+            ChevronDown: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            ),
+            Trophy: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            ),
+            Info: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            ),
+            X: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+            ),
+            Save: (props) => (
+                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            )
+        };
+
+        // --- 2. API SERVICE ---
+        const isGASEnvironment = () => {
+            return typeof google !== 'undefined' && google.script && google.script.run;
+        };
+
+        const serverCall = (functionName, ...args) => {
+            return new Promise((resolve, reject) => {
+                if (!isGASEnvironment()) {
+                    // MOCK DATA HANDLING (For Local Testing)
+                    console.warn('Running in Mock Mode (No GAS detected)');
+                    setTimeout(() => {
+                        if (functionName === 'doLogin') {
+                            // Updated Mock to match user's real credentials for testing
+                            const { username, password } = args[0];
+                            if (username === 'admin' && password === 'admin123') 
+                                resolve({ username: 'admin', division: 'Admin', isAdmin: true });
+                            else if (username === '1111' && password === '1234') 
+                                resolve({ username: '1111', division: 'ฝ่าย Customer Service System', isAdmin: false });
+                            else resolve(null);
+                        } else if (functionName === 'getDivisions') {
+                            resolve(['ฝ่าย Customer Service System', 'ฝ่าย Marketing', 'ฝ่าย IT Infrastructure']);
+                        } else if (functionName === 'getScores') {
+                            resolve({
+                                'ฝ่าย Customer Service System': {
+                                    quarters: {
+                                        1: { scores: {1:15, 2:12, 3:18, 4:10, 5:0}, comment: 'Mock Data 1' },
+                                    }
+                                }
+                            });
+                        } else if (functionName === 'saveScores') {
+                            resolve(true);
+                        }
+                    }, 500);
+                    return;
+                }
+                google.script.run
+                    .withSuccessHandler(resolve)
+                    .withFailureHandler((err) => {
+                        console.error("GAS Error:", err);
+                        reject(err);
+                    })
+                    [functionName](...args);
+            });
+        };
+
+        const api = {
+            login: (creds) => serverCall('doLogin', creds),
+            getScores: (division) => serverCall('getScores', division),
+            getDivisions: () => serverCall('getDivisions'),
+            saveScores: (params) => serverCall('saveScores', params)
+        };
+
+        // --- 3. COMPONENTS ---
+        const { useState, useEffect } = React;
+        const RechartsLib = window.Recharts || window.Recharts?.default || {};
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } = RechartsLib;
+
+        // Login Component
+        const Login = ({ onLogin, isLoading, error }) => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onLogin({ username, password });
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+                    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+                        <div className="bg-gradient-to-br from-blue-800 to-blue-600 p-8 text-center">
+                            <div className="mx-auto bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                                <Icons.ShieldCheck className="w-10 h-10 text-white" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-white mb-2">Risk Management Award</h1>
+                            <p className="text-blue-100">ระบบบริหารจัดการความเสี่ยง 2025</p>
+                        </div>
+                        <div className="p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="กรอกชื่อผู้ใช้" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="กรอกรหัสผ่าน" />
+                                </div>
+                                {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>}
+                                <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                                    {isLoading ? <><Icons.Loader2 className="w-5 h-5 animate-spin" /> กำลังเข้าสู่ระบบ...</> : 'เข้าสู่ระบบ'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Layout Component
+        const Layout = ({ user, onLogout, children, activeTab, setActiveTab }) => {
+            return (
+                <div className="min-h-screen bg-gray-50 flex flex-col">
+                    <header className="bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-lg sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Icons.ShieldCheck className="w-8 h-8 text-blue-200" />
+                                <h1 className="text-xl font-bold">Risk Management Award 2025</h1>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="hidden md:flex items-center gap-2 text-blue-100 bg-blue-800/50 px-3 py-1.5 rounded-full text-sm">
+                                    <Icons.User className="w-4 h-4" />
+                                    <span className="truncate max-w-[200px]">{user.division}</span>
+                                    {user.isAdmin && <span className="bg-amber-400 text-blue-900 text-xs px-2 py-0.5 rounded-full font-bold">ADMIN</span>}
+                                </div>
+                                <button onClick={onLogout} className="p-2 hover:bg-white/10 rounded-full text-blue-100"><Icons.LogOut className="w-5 h-5" /></button>
+                            </div>
+                        </div>
+                    </header>
+                    <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex space-x-8">
+                                <button onClick={() => setActiveTab('details')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'details' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>รายละเอียดคะแนน</button>
+                                <button onClick={() => setActiveTab('dashboard')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'dashboard' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Dashboard ภาพรวม</button>
+                            </div>
+                        </div>
+                    </div>
+                    <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">{children}</main>
+                </div>
+            );
+        };
+
+        // ScoreView Component
+        const SCORE_CATEGORIES = [
+            { id: 1, name: '1. การใช้แบบฟอร์มการประเมินความเสี่ยง', max: 20 },
+            { id: 2, name: '2. ความครอบคลุมในการระบุความเสี่ยง', max: 20 },
+            { id: 3, name: '3. ความชัดเจนของเป้าหมายและแผนจัดการ', max: 20 },
+            { id: 4, name: '4. การให้ความร่วมมือและการส่งรายงาน', max: 20 },
+            { id: 5, name: '5. ความสำเร็จในการลดความเสี่ยง (เฉพาะ Q4)', max: 20, q4Only: true },
+        ];
+
+        const ScoreView = ({ divisionName, data, isAdmin, divisionsList, onChangeDivision, onEditClick }) => {
+            const [selectedQuarter, setSelectedQuarter] = useState('summary');
+            
+            const getScore = (q, catId) => data?.quarters?.[q]?.scores?.[catId] ?? '-';
+            const getQuarterTotal = (q) => {
+                const scores = data?.quarters?.[q]?.scores;
+                if (!scores) return 0;
+                return Object.values(scores).reduce((a, b) => a + b, 0);
+            };
+            const grandTotal = [1, 2, 3, 4].reduce((sum, q) => sum + getQuarterTotal(q), 0);
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                            <div>
+                                <h2 className="text-gray-500 text-sm font-medium uppercase">หน่วยงาน</h2>
+                                {isAdmin ? (
+                                    <div className="relative mt-1">
+                                        <select value={divisionName} onChange={(e) => onChangeDivision(e.target.value)} className="appearance-none block w-full pl-3 pr-10 py-2 text-xl font-bold border-b-2 border-blue-500 focus:outline-none bg-transparent">
+                                            {divisionsList.map(div => <option key={div} value={div}>{div}</option>)}
+                                        </select>
+                                        <Icons.ChevronDown className="absolute right-2 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    </div>
+                                ) : (
+                                    <div className="text-2xl font-bold text-gray-900 mt-1">{divisionName}</div>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4 bg-blue-50 px-4 py-3 rounded-lg border border-blue-100">
+                                <div className="p-2 bg-blue-100 rounded-full"><Icons.Trophy className="w-6 h-6 text-blue-600" /></div>
+                                <div><div className="text-sm text-blue-600 font-medium">คะแนนรวมสะสม</div><div className="text-2xl font-bold text-blue-800">{grandTotal} <span className="text-sm font-normal text-blue-600">/ 400</span></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex space-x-2 overflow-x-auto pb-2 custom-scrollbar">
+                        <button onClick={() => setSelectedQuarter('summary')} className={`px-6 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedQuarter === 'summary' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}>ภาพรวมทุกไตรมาส</button>
+                        {[1, 2, 3, 4].map(q => (
+                            <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-6 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedQuarter === q ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}>ไตรมาสที่ {q}</button>
+                        ))}
+                    </div>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        {selectedQuarter === 'summary' ? (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase w-1/2">หัวข้อการประเมิน</th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">เต็ม</th>
+                                            {[1,2,3,4].map(q => <th key={q} className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Q{q}</th>)}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {SCORE_CATEGORIES.map(cat => (
+                                            <tr key={cat.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.name}</td>
+                                                <td className="px-6 py-4 text-sm text-center text-gray-500 bg-gray-50/50">{cat.max}</td>
+                                                {[1,2,3,4].map(q => (
+                                                    <td key={q} className="px-6 py-4 text-sm text-center text-gray-700">{cat.q4Only && q !== 4 ? '-' : getScore(q, cat.id)}</td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                        <tr className="bg-blue-50/50 font-bold text-blue-900">
+                                            <td className="px-6 py-4">คะแนนรวม</td>
+                                            <td className="px-6 py-4 text-center">100</td>
+                                            {[1,2,3,4].map(q => <td key={q} className="px-6 py-4 text-center">{getQuarterTotal(q)}</td>)}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">รายละเอียดคะแนน ไตรมาสที่ {selectedQuarter} <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Total: {getQuarterTotal(selectedQuarter)}</span></h3>
+                                    {isAdmin && <button onClick={() => onEditClick(selectedQuarter)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2">แก้ไขคะแนน / คอมเมนต์</button>}
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    <div className="lg:col-span-2 space-y-4">
+                                        {SCORE_CATEGORIES.map(cat => {
+                                            if (cat.q4Only && selectedQuarter !== 4) return null;
+                                            const score = getScore(selectedQuarter, cat.id);
+                                            const percentage = typeof score === 'number' ? (score / cat.max) * 100 : 0;
+                                            return (
+                                                <div key={cat.id} className="bg-gray-50 p-4 rounded-lg">
+                                                    <div className="flex justify-between items-end mb-2"><span className="text-sm font-medium text-gray-700">{cat.name}</span><span className="font-bold text-gray-900">{score} <span className="text-gray-400 text-xs font-normal">/ {cat.max}</span></span></div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2.5"><div className={`h-2.5 rounded-full ${percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`} style={{ width: `${percentage}%` }}></div></div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                    <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-5 h-fit">
+                                        <h4 className="font-semibold text-yellow-800 mb-3 flex items-center gap-2"><Icons.Info className="w-4 h-4" /> สรุปผลและข้อเสนอแนะ</h4>
+                                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{data?.quarters?.[selectedQuarter]?.comment || "ไม่มีข้อมูลคอมเมนต์"}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard Component
+        const Dashboard = ({ currentDivision, allScores, isAdmin, divisionsList }) => {
+            if (!currentDivision || !allScores || Object.keys(allScores).length === 0) return <div className="h-64 flex items-center justify-center text-gray-400">กำลังโหลดข้อมูล...</div>;
+
+            const getQuarterlyData = (division) => {
+                const data = allScores[division];
+                return [1, 2, 3, 4].map(q => {
+                    const scores = data?.quarters?.[q]?.scores;
+                    const total = scores ? Object.values(scores).reduce((a, b) => a + b, 0) : 0;
+                    return { name: `Q${q}`, score: total };
+                });
+            };
+
+            const getRadarData = (division) => {
+                const data = allScores[division];
+                const categories = [
+                    { id: 1, name: 'แบบฟอร์ม' }, { id: 2, name: 'ความครอบคลุม' },
+                    { id: 3, name: 'เป้าหมาย' }, { id: 4, name: 'ความร่วมมือ' },
+                    { id: 5, name: 'ความสำเร็จ' }
+                ];
+                return categories.map(cat => {
+                    let sum = 0, count = 0;
+                    [1,2,3,4].forEach(q => {
+                        const s = data?.quarters?.[q]?.scores?.[cat.id];
+                        if (s !== undefined && (cat.id !== 5 || q === 4)) { sum += s; count++; }
+                    });
+                    return { subject: cat.name, A: count > 0 ? (sum / count) : 0, fullMark: 20 };
+                });
+            };
+
+            const getRankingData = () => {
+                return divisionsList.map(div => {
+                    const dData = allScores[div];
+                    let total = 0;
+                    if (dData) {
+                        [1,2,3,4].forEach(q => {
+                            const scores = dData.quarters?.[q]?.scores;
+                            if (scores) total += Object.values(scores).reduce((a, b) => a + b, 0);
+                        });
+                    }
+                    return { name: div, total: total };
+                }).sort((a, b) => b.total - a.total).slice(0, 10);
+            };
+
+            const chartData = getQuarterlyData(currentDivision);
+            const radarData = getRadarData(currentDivision);
+            const rankingData = getRankingData();
+
+            // Safety check for Recharts components
+            if (!BarChart) return <div className="p-4 text-red-500">Error: Graphics library failed to load. Please refresh the page.</div>;
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2"><span className="bg-blue-600 w-2 h-6 rounded-sm"></span> Dashboard ภาพรวมคะแนน</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">แนวโน้มคะแนนรายไตรมาส ({currentDivision})</h3>
+                            <div className="h-72 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="name" /><YAxis domain={[0, 100]} /><Tooltip /><Bar dataKey="score" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} /></BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">จุดแข็ง / จุดที่ควรพัฒนา</h3>
+                            <div className="h-72 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                                        <PolarGrid /><PolarAngleAxis dataKey="subject" tick={{fontSize: 12}} /><PolarRadiusAxis angle={30} domain={[0, 20]} /><Radar name={currentDivision} dataKey="A" stroke="#2563eb" fill="#3b82f6" fillOpacity={0.4} /><Tooltip />
+                                    </RadarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+                    {isAdmin && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
+                            <h3 className="text-lg font-bold text-gray-800 mb-6">🏆 อันดับคะแนนรวมสูงสุด (Top 10)</h3>
+                            <div className="h-80 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart layout="vertical" data={rankingData} margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={180} tick={{fontSize: 12}} /><Tooltip /><Bar dataKey="total" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // AdminPanel Component
+        const AdminPanel = ({ isOpen, onClose, onSave, initialData, divisionName, quarter }) => {
+            const [scores, setScores] = useState({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+            const [comment, setComment] = useState('');
+            const [isSaving, setIsSaving] = useState(false);
+
+            useEffect(() => {
+                if (isOpen) {
+                    const qData = initialData?.quarters?.[quarter];
+                    setScores(qData?.scores || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+                    setComment(qData?.comment || '');
+                }
+            }, [isOpen, initialData, quarter]);
+
+            if (!isOpen) return null;
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsSaving(true);
+                await onSave(scores, comment);
+                setIsSaving(false);
+                onClose();
+            };
+
+            const labels = {1:'การใช้แบบฟอร์ม', 2:'ความครอบคลุม', 3:'เป้าหมาย', 4:'ความร่วมมือ', 5:'ความสำเร็จ(Q4)'};
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fade-in">
+                        <div className="bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <div><h3 className="text-lg font-bold">แก้ไขคะแนน</h3><p className="text-sm text-gray-600">{divisionName} - Q{quarter}</p></div>
+                            <button onClick={onClose}><Icons.X className="w-5 h-5 text-gray-500" /></button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div className="space-y-4">
+                                {[1,2,3,4].map(id => (
+                                    <div key={id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                                        <label className="text-sm font-medium text-gray-700 flex-1">{id}. {labels[id]} (20)</label>
+                                        <input type="number" min="0" max="20" value={scores[id] || ''} onChange={(e) => setScores({...scores, [id]: parseInt(e.target.value) || 0})} className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    </div>
+                                ))}
+                                {quarter === 4 && (
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                        <label className="text-sm font-medium text-blue-900 flex-1">5. {labels[5]} (20)</label>
+                                        <input type="number" min="0" max="20" value={scores[5] || ''} onChange={(e) => setScores({...scores, 5: parseInt(e.target.value) || 0})} className="w-full sm:w-24 px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    </div>
+                                )}
+                                <div className="pt-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">ข้อเสนอแนะ</label>
+                                    <textarea rows={4} value={comment} onChange={(e) => setComment(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none" placeholder="กรอกความคิดเห็น..."></textarea>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg">ยกเลิก</button>
+                                <button type="submit" disabled={isSaving} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                                    {isSaving ? 'กำลังบันทึก...' : <><Icons.Save className="w-4 h-4" /> บันทึก</>}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 4. MAIN APP ---
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [scores, setScores] = useState({});
+            const [divisions, setDivisions] = useState([]);
+            const [activeTab, setActiveTab] = useState('details');
+            const [selectedDivision, setSelectedDivision] = useState('');
+            const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [editQuarter, setEditQuarter] = useState(1);
+
+            useEffect(() => {
+                if (user) {
+                    setIsLoading(true);
+                    const loadData = async () => {
+                        try {
+                            const divs = await api.getDivisions();
+                            setDivisions(divs);
+                            const divToLoad = user.isAdmin ? 'all' : user.division;
+                            const data = await api.getScores(divToLoad);
+                            setScores(data);
+                            setSelectedDivision(user.isAdmin && divs.length > 0 ? divs[0] : user.division);
+                        } catch (err) { console.error(err); setError("Failed to load data"); } 
+                        finally { setIsLoading(false); }
+                    };
+                    loadData();
+                }
+            }, [user]);
+
+            const handleLogin = async (creds) => {
+                setIsLoading(true); setError(null);
+                try {
+                    const loggedInUser = await api.login(creds);
+                    if (loggedInUser) {
+                        setUser(loggedInUser);
+                        if (!loggedInUser.isAdmin) setSelectedDivision(loggedInUser.division);
+                    } else setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+                } catch (e) { setError('เกิดข้อผิดพลาดในการเชื่อมต่อ (Connection Error)'); } 
+                finally { setIsLoading(false); }
+            };
+
+            const handleSaveScore = async (newScores, newComment) => {
+                const updatedScores = { ...scores };
+                if (!updatedScores[selectedDivision]) updatedScores[selectedDivision] = { quarters: {} };
+                updatedScores[selectedDivision].quarters[editQuarter] = { scores: newScores, comment: newComment };
+                setScores(updatedScores);
+                await api.saveScores({ division: selectedDivision, quarter: editQuarter, scores: newScores, comment: newComment });
+            };
+
+            if (!user) return <Login onLogin={handleLogin} isLoading={isLoading} error={error} />;
+
+            return (
+                <Layout user={user} onLogout={() => { setUser(null); setScores({}); }} activeTab={activeTab} setActiveTab={setActiveTab}>
+                    {activeTab === 'details' ? (
+                        <ScoreView 
+                            divisionName={selectedDivision} 
+                            data={scores[selectedDivision]} 
+                            isAdmin={user.isAdmin} 
+                            divisionsList={divisions} 
+                            onChangeDivision={setSelectedDivision} 
+                            onEditClick={(q) => { setEditQuarter(q); setIsEditModalOpen(true); }} 
+                        />
+                    ) : (
+                        <Dashboard currentDivision={selectedDivision} allScores={scores} isAdmin={user.isAdmin} divisionsList={divisions} />
+                    )}
+                    <AdminPanel isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} onSave={handleSaveScore} initialData={scores[selectedDivision]} divisionName={selectedDivision} quarter={editQuarter} />
+                </Layout>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
