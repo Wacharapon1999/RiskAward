@@ -2,7 +2,8 @@ import { AllScores, LoginCredentials, SaveScoreParams, User } from '../types';
 
 // ============================================================================
 // ⚠️ ใส่ URL ของ Google Apps Script Web App ที่คุณ Deploy แล้ว ตรงนี้ครับ ⚠️
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyjIBiZMUz9FIF9QBvRrB2gVL06-6ZpZc37AgvYYk83Eaa5YI12jAU1FkjWvduJ3Y6HQ/exec"; 
+// ตรวจสอบให้แน่ใจว่า Deploy เป็น "New deployment" และเลือก Who has access เป็น "Anyone"
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxA-TCxLvB1SSCZT99AWO6E9ZA7F1BbjmQwl6cDCfucmT7JYVaXxYy6NZjZxcct3Pju/exec"; 
 // ============================================================================
 
 /**
@@ -34,11 +35,32 @@ const apiCall = async <T>(method: 'GET' | 'POST', params: any = {}): Promise<T> 
 
   try {
     const response = await fetch(url, options);
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    return data as T;
+
+    // Read text first to check if it's JSON or HTML (Login page)
+    const textData = await response.text();
+
+    try {
+      const data = JSON.parse(textData);
+      
+      // Check for Google Script specific error objects
+      if (data && data.status === 'error') {
+         throw new Error(data.message || 'Script Error');
+      }
+      
+      return data as T;
+    } catch (e) {
+      // If parsing fails, it's likely HTML (Google Login Page) because of permissions
+      console.error("Failed to parse JSON. Response was:", textData.substring(0, 100) + "...");
+      if (textData.includes("<!DOCTYPE html") || textData.includes("Sign in")) {
+         throw new Error("Connection Error: Access Denied. Please check Google Script permissions (Must be 'Anyone').");
+      }
+      throw new Error("Invalid server response");
+    }
+
   } catch (error) {
     console.error("API Call Error:", error);
     throw error;
@@ -56,7 +78,7 @@ export const api = {
       });
     } catch (e) {
       console.error("Login failed", e);
-      return null;
+      throw e; // Rethrow to show error in UI
     }
   },
 
