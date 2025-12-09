@@ -1,9 +1,8 @@
 import { AllScores, LoginCredentials, SaveScoreParams, User } from '../types';
 
 // ============================================================================
-// ⚠️ ใส่ URL ของ Google Apps Script Web App ที่คุณ Deploy แล้ว ตรงนี้ครับ ⚠️
-// ตรวจสอบให้แน่ใจว่า Deploy เป็น "New deployment" และเลือก Who has access เป็น "Anyone"
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxA-TCxLvB1SSCZT99AWO6E9ZA7F1BbjmQwl6cDCfucmT7JYVaXxYy6NZjZxcct3Pju/exec"; 
+// ⚠️ สำคัญ: นำ URL ที่ได้จากการ Deploy Google Apps Script มาวางตรงนี้ครับ ⚠️
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWH1jbk9kvdN__PsCD4_JULJhWhhNbNFkMv21bVYKlnIMBaWx2ptScznQvCtocQ0_E/exec"; 
 // ============================================================================
 
 /**
@@ -11,9 +10,9 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxA-TCxLvB1SS
  */
 const apiCall = async <T>(method: 'GET' | 'POST', params: any = {}): Promise<T> => {
   // If no URL is set, return mock data or error
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("วาง_URL")) {
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("ใส่_URL")) {
     console.warn("Please set the GOOGLE_SCRIPT_URL in services/api.ts");
-    throw new Error("API URL not configured");
+    throw new Error("กรุณาใส่ URL ของ Google Apps Script ในไฟล์ services/api.ts");
   }
 
   let url = GOOGLE_SCRIPT_URL;

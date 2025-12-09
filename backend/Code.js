@@ -1,16 +1,43 @@
 
 /**
  * CONFIGURATION
- * ID ของ Google Sheet ที่ต้องการเชื่อมต่อ
+ * ID ของ Google Sheet ใหม่ที่คุณระบุ
  */
-const SPREADSHEET_ID = '17UQlVxKyv2wsAbO3ZFwDY9jY51vdSKf-ppNA7rdhjNs';
+const SPREADSHEET_ID = '1Zsk3xcmZykE2-PajtNWHfFKHkx8gjToZoPWEFmIk_pU';
 
 function getDb() {
   return SpreadsheetApp.openById(SPREADSHEET_ID);
 }
 
 // -----------------------------------------------------------------------------
-// API HANDLERS (Handle requests from GitHub/External)
+// SETUP FUNCTION (รันครั้งแรกครั้งเดียวเพื่อสร้างตาราง)
+// -----------------------------------------------------------------------------
+function setupDatabase() {
+  const ss = getDb();
+  
+  // 1. Setup UserData Sheet
+  let userSheet = ss.getSheetByName('UserData');
+  if (!userSheet) {
+    userSheet = ss.insertSheet('UserData');
+    // Header
+    userSheet.getRange('A1:D1').setValues([['Username', 'Password', 'Division', 'IsAdmin']]);
+    // Default Admin User
+    userSheet.appendRow(['admin', 'admin123', 'Admin', 'TRUE']);
+    // Default Normal User
+    userSheet.appendRow(['1111', '1234', 'Customer Service', 'FALSE']);
+  }
+
+  // 2. Setup ScoreData Sheet
+  let scoreSheet = ss.getSheetByName('ScoreData');
+  if (!scoreSheet) {
+    scoreSheet = ss.insertSheet('ScoreData');
+    // Header
+    scoreSheet.getRange('A1:H1').setValues([['Division', 'Quarter', 'Score1', 'Score2', 'Score3', 'Score4', 'Score5', 'Comment']]);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// API HANDLERS
 // -----------------------------------------------------------------------------
 
 function responseJSON(data) {

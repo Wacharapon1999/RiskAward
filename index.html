@@ -40,7 +40,7 @@
 
     <script type="text/babel">
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxA-TCxLvB1SSCZT99AWO6E9ZA7F1BbjmQwl6cDCfucmT7JYVaXxYy6NZjZxcct3Pju/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWH1jbk9kvdN__PsCD4_JULJhWhhNbNFkMv21bVYKlnIMBaWx2ptScznQvCtocQ0_E/exec";
 
         // --- 1. ICONS ---
         const Icons = {
@@ -93,8 +93,11 @@
                 }
 
                 // CASE 2: Running on Vercel / External Web
-                // Use fetch to call the deployed Web App URL
-                
+                if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("ใส่_URL")) {
+                    reject("กรุณาใส่ URL ของ Google Apps Script ในโค้ดก่อนครับ");
+                    return;
+                }
+
                 const method = (functionName.startsWith('get')) ? 'GET' : 'POST';
                 let url = GOOGLE_SCRIPT_URL;
                 let options = {
