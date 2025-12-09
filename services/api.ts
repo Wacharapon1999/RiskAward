@@ -55,7 +55,7 @@ const apiCall = async <T>(method: 'GET' | 'POST', params: any = {}): Promise<T> 
       // If parsing fails, it's likely HTML (Google Login Page) because of permissions
       console.error("Failed to parse JSON. Response was:", textData.substring(0, 100) + "...");
       if (textData.includes("<!DOCTYPE html") || textData.includes("Sign in")) {
-         throw new Error("Connection Error: Access Denied. Please check Google Script permissions (Must be 'Anyone').");
+         throw new Error("Access Denied: Please check Google Script permissions (Must be 'Anyone').");
       }
       throw new Error("Invalid server response");
     }
