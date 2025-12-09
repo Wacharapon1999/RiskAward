@@ -17,7 +17,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 
-    <!-- React 18 UMD (No Import Map to avoid conflicts) -->
+    <!-- React 18 UMD -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
@@ -39,6 +39,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxA-TCxLvB1SSCZT99AWO6E9ZA7F1BbjmQwl6cDCfucmT7JYVaXxYy6NZjZxcct3Pju/exec";
+
         // --- 1. ICONS ---
         const Icons = {
             ShieldCheck: (props) => (
@@ -77,41 +80,69 @@
 
         const serverCall = (functionName, ...args) => {
             return new Promise((resolve, reject) => {
-                if (!isGASEnvironment()) {
-                    // MOCK DATA HANDLING (For Local Testing)
-                    console.warn('Running in Mock Mode (No GAS detected)');
-                    setTimeout(() => {
-                        if (functionName === 'doLogin') {
-                            // Updated Mock to match user's real credentials for testing
-                            const { username, password } = args[0];
-                            if (username === 'admin' && password === 'admin123') 
-                                resolve({ username: 'admin', division: 'Admin', isAdmin: true });
-                            else if (username === '1111' && password === '1234') 
-                                resolve({ username: '1111', division: 'ฝ่าย Customer Service System', isAdmin: false });
-                            else resolve(null);
-                        } else if (functionName === 'getDivisions') {
-                            resolve(['ฝ่าย Customer Service System', 'ฝ่าย Marketing', 'ฝ่าย IT Infrastructure']);
-                        } else if (functionName === 'getScores') {
-                            resolve({
-                                'ฝ่าย Customer Service System': {
-                                    quarters: {
-                                        1: { scores: {1:15, 2:12, 3:18, 4:10, 5:0}, comment: 'Mock Data 1' },
-                                    }
-                                }
-                            });
-                        } else if (functionName === 'saveScores') {
-                            resolve(true);
-                        }
-                    }, 500);
+                // CASE 1: Running inside Google Apps Script
+                if (isGASEnvironment()) {
+                    google.script.run
+                        .withSuccessHandler(resolve)
+                        .withFailureHandler((err) => {
+                            console.error("GAS Error:", err);
+                            reject(err);
+                        })
+                        [functionName](...args);
                     return;
                 }
-                google.script.run
-                    .withSuccessHandler(resolve)
-                    .withFailureHandler((err) => {
-                        console.error("GAS Error:", err);
-                        reject(err);
+
+                // CASE 2: Running on Vercel / External Web
+                // Use fetch to call the deployed Web App URL
+                
+                const method = (functionName.startsWith('get')) ? 'GET' : 'POST';
+                let url = GOOGLE_SCRIPT_URL;
+                let options = {
+                    method: method,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Prevent CORS preflight
+                    redirect: 'follow',
+                };
+
+                if (method === 'GET') {
+                    // Query Params
+                    const query = new URLSearchParams();
+                    query.append('action', functionName);
+                    if (functionName === 'getScores' && args[0]) {
+                        query.append('division', args[0]);
+                    }
+                    // For getDivisions, no extra params
+                    
+                    url += '?' + query.toString();
+                    delete options.body;
+                    delete options.headers; 
+                } else {
+                    // POST Body
+                    let action = functionName;
+                    if (functionName === 'doLogin') action = 'login';
+                    // args[0] contains the data object (creds or score params)
+                    options.body = JSON.stringify({ action: action, ...args[0] });
+                }
+
+                fetch(url, options)
+                    .then(response => {
+                         if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+                         return response.text();
                     })
-                    [functionName](...args);
+                    .then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            if (data && data.status === 'error') throw new Error(data.message);
+                            resolve(data);
+                        } catch (e) {
+                            console.error("JSON Parse Error. Response:", text.substring(0,100));
+                            if (text.includes("Sign in")) {
+                                reject("Access Denied: Please set Google Script Deployment to 'Anyone'");
+                            } else {
+                                reject("Invalid Server Response");
+                            }
+                        }
+                    })
+                    .catch(reject);
             });
         };
 
