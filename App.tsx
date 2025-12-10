@@ -7,7 +7,7 @@ import { ScoreView } from './components/ScoreView';
 import { Dashboard } from './components/Dashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { api } from './services/api';
-import { User, AllScores, LoginCredentials, ScoreSet } from './types';
+import { User, AllScores, LoginCredentials, ScoreSet, DivisionData } from './types';
 
 function App() {
   // Application State
@@ -35,15 +35,55 @@ function App() {
         const loadData = async () => {
             try {
                 // Load divisions list first
-                const divs = await api.getDivisions();
-                setDivisions(divs);
+                let divs = await api.getDivisions();
                 
                 // Load initial scores
                 const divToLoad = user.isAdmin ? 'all' : user.division;
-                const data = await api.getScores(divToLoad);
+                let data = await api.getScores(divToLoad);
+
+                // --- Calculate Average for Admin ---
+                if (user.isAdmin) {
+                    const avgName = "คะแนนเฉลี่ยทั้งหมด";
+                    const avgData: DivisionData = { quarters: {} };
+                    
+                    for (let q = 1; q <= 4; q++) {
+                        let count = 0;
+                        const sums: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                        
+                        Object.values(data).forEach((d) => {
+                             if (d.quarters?.[q]) {
+                                 count++;
+                                 for(let c=1; c<=5; c++) {
+                                    // Cast to any/number to avoid strict type indexing issues in this context
+                                    const score = (d.quarters[q].scores as any)[c] || 0;
+                                    sums[c] += score;
+                                 }
+                             }
+                        });
+
+                        if (count > 0) {
+                            avgData.quarters[q] = {
+                                scores: {
+                                    1: sums[1] / count,
+                                    2: sums[2] / count,
+                                    3: sums[3] / count,
+                                    4: sums[4] / count,
+                                    5: sums[5] / count
+                                },
+                                comment: `ค่าเฉลี่ยจาก ${count} หน่วยงาน`
+                            };
+                        }
+                    }
+
+                    // Prepend Average to lists
+                    divs = [avgName, ...divs];
+                    data = { [avgName]: avgData, ...data };
+                }
+
+                setDivisions(divs);
                 setScores(data);
                 
-                // Set selected division based on loaded divs
+                // Set selected division based on loaded divs (Average will be first for Admin)
                 setSelectedDivision(user.isAdmin && divs.length > 0 ? divs[0] : user.division);
             } catch (err) {
                 console.error("Failed to load data", err);

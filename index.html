@@ -7,14 +7,50 @@
     
     <!-- Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Fonts: Figtree (English) and Kanit (Thai) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'Kanit', 'sans-serif'],
+                    },
+                    colors: {
+                        ci: {
+                            green: '#007947', // Primary Green
+                            darkGreen: '#005833',
+                            lightGreen: '#E6F2ED',
+                            red: '#E30613',   // Secondary Red
+                            darkRed: '#B0000B',
+                            lightRed: '#FCE6E7'
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
-        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        body { 
+            font-family: 'Figtree', 'Kanit', sans-serif; 
+            background-color: #f8fafc; 
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Glassmorphism utilities */
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
     </style>
 
     <!-- React 18 UMD -->
@@ -40,119 +76,71 @@
 
     <script type="text/babel">
         // --- CONFIGURATION ---
-        // ตรวจสอบ URL นี้ให้ถูกต้อง (URL นี้มาจากที่คุณส่งให้ล่าสุด)
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWH1jbk9kvdN__PsCD4_JULJhWhhNbNFkMv21bVYKlnIMBaWx2ptScznQvCtocQ0_E/exec";
 
         // --- 1. ICONS ---
         const Icons = {
-            ShieldCheck: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            ),
-            LogOut: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-            ),
-            User: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            ),
-            Loader2: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-            ),
-            ChevronDown: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            ),
-            Trophy: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            ),
-            Info: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            ),
-            X: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
-            ),
-            Save: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            ),
-            Wifi: (props) => (
-                <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-            )
+            ShieldCheck: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
+            LogOut: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
+            User: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Loader2: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>,
+            ChevronDown: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
+            Trophy: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
+            Info: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>,
+            Save: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            TrendingUp: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+            Award: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
+            Target: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+            BarChart3: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>,
+            PieChart: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
         };
 
         // --- 2. API SERVICE ---
-        const isGASEnvironment = () => {
-            return typeof google !== 'undefined' && google.script && google.script.run;
-        };
+        const isGASEnvironment = () => typeof google !== 'undefined' && google.script && google.script.run;
 
         const serverCall = (functionName, ...args) => {
             return new Promise((resolve, reject) => {
-                // CASE 1: Running inside Google Apps Script
                 if (isGASEnvironment()) {
                     google.script.run
                         .withSuccessHandler(resolve)
-                        .withFailureHandler((err) => {
-                            console.error("GAS Error:", err);
-                            reject(err);
-                        })
+                        .withFailureHandler((err) => { console.error("GAS Error:", err); reject(err); })
                         [functionName](...args);
                     return;
                 }
-
-                // CASE 2: Running on Vercel / External Web
                 if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("ใส่_URL")) {
                     reject("กรุณาใส่ URL ของ Google Apps Script ในโค้ดก่อนครับ");
                     return;
                 }
-
                 const method = (functionName.startsWith('get')) ? 'GET' : 'POST';
                 let url = GOOGLE_SCRIPT_URL;
-                let options = {
-                    method: method,
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Prevent CORS preflight
-                    redirect: 'follow',
-                };
+                let options = { method: method, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' };
 
                 if (method === 'GET') {
-                    // Query Params
                     const query = new URLSearchParams();
                     query.append('action', functionName);
-                    if (functionName === 'getScores' && args[0]) {
-                        query.append('division', args[0]);
-                    }
-                    // For getDivisions, no extra params
-                    
+                    if (functionName === 'getScores' && args[0]) query.append('division', args[0]);
                     url += '?' + query.toString();
-                    delete options.body;
-                    delete options.headers; 
+                    delete options.body; delete options.headers; 
                 } else {
-                    // POST Body
                     let action = functionName;
                     if (functionName === 'doLogin') action = 'login';
-                    // args[0] contains the data object (creds or score params)
                     options.body = JSON.stringify({ action: action, ...args[0] });
                 }
 
                 fetch(url, options)
-                    .then(response => {
-                         if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-                         return response.text();
-                    })
+                    .then(response => { if (!response.ok) throw new Error(`HTTP Error ${response.status}`); return response.text(); })
                     .then(text => {
                         try {
                             const data = JSON.parse(text);
                             if (data && data.status === 'error') throw new Error(data.message);
                             resolve(data);
                         } catch (e) {
-                            console.error("JSON Parse Error. Response:", text.substring(0,100));
-                            if (text.includes("Sign in")) {
-                                reject("❌ เชื่อมต่อไม่ได้: ติดสิทธิ์ Google (Access Denied)\n\nวิธีแก้: ไปที่ Google Apps Script > Deploy > New Deployment > เลือก 'Anyone' (ทุกคน)");
-                            } else {
-                                reject("Invalid Server Response: " + text.substring(0, 50));
-                            }
+                            if (text.includes("Sign in")) reject("❌ เชื่อมต่อไม่ได้: ติดสิทธิ์ Google (Access Denied) ให้เลือก 'Anyone' ตอน Deploy");
+                            else reject("Invalid Server Response");
                         }
                     })
-                    .catch(error => {
-                        console.error("Fetch Error:", error);
-                        reject(error.message || "Connection Failed");
-                    });
+                    .catch(error => reject(error.message || "Connection Failed"));
             });
         };
 
@@ -166,45 +154,44 @@
         // --- 3. COMPONENTS ---
         const { useState, useEffect } = React;
         const RechartsLib = window.Recharts || window.Recharts?.default || {};
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } = RechartsLib;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } = RechartsLib;
 
         // Login Component
         const Login = ({ onLogin, isLoading, error }) => {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                onLogin({ username, password });
-            };
+            const handleSubmit = (e) => { e.preventDefault(); onLogin({ username, password }); };
 
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-                    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-                        <div className="bg-gradient-to-br from-blue-800 to-blue-600 p-8 text-center relative">
-                            <div className="mx-auto bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans">
+                    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                        {/* CI GREEN Background */}
+                        <div className="bg-gradient-to-br from-ci-green to-ci-darkGreen p-10 text-center relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                            <div className="mx-auto bg-white/20 w-16 h-16 rounded-2xl rotate-3 flex items-center justify-center mb-4 backdrop-blur-sm shadow-lg">
                                 <Icons.ShieldCheck className="w-10 h-10 text-white" />
                             </div>
-                            <h1 className="text-2xl font-bold text-white mb-2">Risk Management Award</h1>
-                            <p className="text-blue-100">ระบบบริหารจัดการความเสี่ยง 2025</p>
+                            <h1 className="text-2xl font-bold text-white mb-2 tracking-wide">Risk Management</h1>
+                            <p className="text-ci-lightGreen text-sm font-medium">Award System 2025</p>
                         </div>
                         <div className="p-8">
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="กรอกชื่อผู้ใช้" />
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase">Username</label>
+                                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-ci-green focus:border-transparent outline-none transition-all text-gray-900" placeholder="Enter your username" />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="กรอกรหัสผ่าน" />
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase">Password</label>
+                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-ci-green focus:border-transparent outline-none transition-all text-gray-900" placeholder="Enter your password" />
                                 </div>
-                                {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm whitespace-pre-line">{error}</div>}
-                                <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
-                                    {isLoading ? <><Icons.Loader2 className="w-5 h-5 animate-spin" /> กำลังเข้าสู่ระบบ...</> : 'เข้าสู่ระบบ'}
+                                {error && <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-ci-red text-sm flex items-center gap-2"><Icons.Info className="w-4 h-4"/>{error}</div>}
+                                <button type="submit" disabled={isLoading} className="w-full bg-ci-green hover:bg-ci-darkGreen text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-ci-green/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                                    {isLoading ? <><Icons.Loader2 className="w-5 h-5 animate-spin" /> Authenticating...</> : 'Sign In'}
                                 </button>
                             </form>
-                            <div className="mt-6 text-center text-xs text-gray-400">
-                                © 2025 Risk Management Department
+                            <div className="mt-8 text-center">
+                                <p className="text-xs text-gray-400">© 2025 Risk Management Department</p>
                             </div>
                         </div>
                     </div>
@@ -215,31 +202,42 @@
         // Layout Component
         const Layout = ({ user, onLogout, children, activeTab, setActiveTab }) => {
             return (
-                <div className="min-h-screen bg-gray-50 flex flex-col">
-                    <header className="bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-lg sticky top-0 z-50">
+                <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+                    <header className="bg-ci-green border-b border-ci-darkGreen sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Icons.ShieldCheck className="w-8 h-8 text-blue-200" />
-                                <h1 className="text-xl font-bold">Risk Management Award 2025</h1>
+                                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white shadow-md">
+                                    <Icons.ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <h1 className="text-lg font-bold text-white tracking-tight hidden md:block">Risk Management Award</h1>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="hidden md:flex items-center gap-2 text-blue-100 bg-blue-800/50 px-3 py-1.5 rounded-full text-sm">
-                                    <Icons.User className="w-4 h-4" />
-                                    <span className="truncate max-w-[200px]">{user.division}</span>
-                                    {user.isAdmin && <span className="bg-amber-400 text-blue-900 text-xs px-2 py-0.5 rounded-full font-bold">ADMIN</span>}
+                                <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-black/10 border border-white/10">
+                                    <div className="w-8 h-8 rounded-full bg-white text-ci-green flex items-center justify-center text-xs font-bold">
+                                        {user.division.charAt(0)}
+                                    </div>
+                                    <div className="hidden md:block text-right">
+                                        <div className="text-xs font-bold text-white leading-none">{user.division}</div>
+                                        {user.isAdmin && <div className="text-[10px] text-yellow-300 font-bold uppercase mt-0.5">Administrator</div>}
+                                    </div>
                                 </div>
-                                <button onClick={onLogout} className="p-2 hover:bg-white/10 rounded-full text-blue-100"><Icons.LogOut className="w-5 h-5" /></button>
+                                <button onClick={onLogout} className="p-2 hover:bg-white/10 text-white/80 hover:text-white rounded-lg transition-colors" title="Logout">
+                                    <Icons.LogOut className="w-5 h-5" />
+                                </button>
                             </div>
                         </div>
                     </header>
-                    <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
+                    
+                    {/* Sub-header Navigation */}
+                    <div className="bg-white border-b border-gray-200 shadow-sm z-40">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex space-x-8">
-                                <button onClick={() => setActiveTab('details')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'details' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>รายละเอียดคะแนน</button>
-                                <button onClick={() => setActiveTab('dashboard')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'dashboard' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Dashboard ภาพรวม</button>
+                            <div className="flex space-x-1">
+                                <button onClick={() => setActiveTab('details')} className={`py-4 px-6 border-b-2 text-sm font-medium transition-colors ${activeTab === 'details' ? 'border-ci-green text-ci-green' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>รายละเอียดคะแนน</button>
+                                <button onClick={() => setActiveTab('dashboard')} className={`py-4 px-6 border-b-2 text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'border-ci-green text-ci-green' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Dashboard ภาพรวม</button>
                             </div>
                         </div>
                     </div>
+
                     <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">{children}</main>
                 </div>
             );
@@ -256,96 +254,121 @@
 
         const ScoreView = ({ divisionName, data, isAdmin, divisionsList, onChangeDivision, onEditClick }) => {
             const [selectedQuarter, setSelectedQuarter] = useState('summary');
-            
+            const fmt = (num) => typeof num === 'number' ? num.toFixed(2) : num;
             const getScore = (q, catId) => data?.quarters?.[q]?.scores?.[catId] ?? '-';
             const getQuarterTotal = (q) => {
                 const scores = data?.quarters?.[q]?.scores;
-                if (!scores) return 0;
-                return Object.values(scores).reduce((a, b) => a + b, 0);
+                return scores ? Object.values(scores).reduce((a, b) => a + b, 0) : 0;
             };
             const grandTotal = [1, 2, 3, 4].reduce((sum, q) => sum + getQuarterTotal(q), 0);
 
             return (
                 <div className="space-y-6 animate-fade-in">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">หน่วยงาน / Division</label>
+                            {isAdmin ? (
+                                <div className="relative mt-1 max-w-md">
+                                    <select value={divisionName} onChange={(e) => onChangeDivision(e.target.value)} className="appearance-none block w-full pl-3 pr-10 py-1 text-2xl font-bold text-gray-900 bg-white border-0 border-b-2 border-gray-200 focus:border-ci-green focus:ring-0 cursor-pointer transition-colors text-gray-900">
+                                        {divisionsList.map(div => <option key={div} value={div} className="text-gray-900 bg-white">{div}</option>)}
+                                    </select>
+                                    <Icons.ChevronDown className="absolute right-0 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+                                </div>
+                            ) : (
+                                <div className="text-2xl font-bold text-gray-900 mt-1">{divisionName}</div>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-5 bg-ci-lightGreen px-6 py-4 rounded-xl border border-ci-green/20 shadow-sm">
+                            <div className="p-3 bg-white rounded-full shadow-sm text-ci-green"><Icons.Trophy className="w-6 h-6" /></div>
                             <div>
-                                <h2 className="text-gray-500 text-sm font-medium uppercase">หน่วยงาน</h2>
-                                {isAdmin ? (
-                                    <div className="relative mt-1">
-                                        <select value={divisionName} onChange={(e) => onChangeDivision(e.target.value)} className="appearance-none block w-full pl-3 pr-10 py-2 text-xl font-bold border-b-2 border-blue-500 focus:outline-none bg-transparent">
-                                            {divisionsList.map(div => <option key={div} value={div}>{div}</option>)}
-                                        </select>
-                                        <Icons.ChevronDown className="absolute right-2 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                ) : (
-                                    <div className="text-2xl font-bold text-gray-900 mt-1">{divisionName}</div>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4 bg-blue-50 px-4 py-3 rounded-lg border border-blue-100">
-                                <div className="p-2 bg-blue-100 rounded-full"><Icons.Trophy className="w-6 h-6 text-blue-600" /></div>
-                                <div><div className="text-sm text-blue-600 font-medium">คะแนนรวมสะสม</div><div className="text-2xl font-bold text-blue-800">{grandTotal} <span className="text-sm font-normal text-blue-600">/ 400</span></div></div>
+                                <div className="text-xs font-bold text-ci-green uppercase tracking-wider">คะแนนรวมสะสม</div>
+                                <div className="text-3xl font-bold text-gray-800 leading-tight">{fmt(grandTotal)} <span className="text-sm text-gray-400 font-medium">/ 340</span></div>
                             </div>
                         </div>
                     </div>
+
                     <div className="flex space-x-2 overflow-x-auto pb-2 custom-scrollbar">
-                        <button onClick={() => setSelectedQuarter('summary')} className={`px-6 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedQuarter === 'summary' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}>ภาพรวมทุกไตรมาส</button>
-                        {[1, 2, 3, 4].map(q => (
-                            <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-6 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedQuarter === q ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}>ไตรมาสที่ {q}</button>
+                        {['summary', 1, 2, 3, 4].map((q) => (
+                            <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${selectedQuarter === q ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/20' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
+                                {q === 'summary' ? 'ภาพรวมทุกไตรมาส' : `ไตรมาสที่ ${q}`}
+                            </button>
                         ))}
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden min-h-[400px]">
                         {selectedQuarter === 'summary' ? (
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase w-1/2">หัวข้อการประเมิน</th>
-                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">เต็ม</th>
-                                            {[1,2,3,4].map(q => <th key={q} className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Q{q}</th>)}
+                                <table className="min-w-full divide-y divide-gray-100">
+                                    <thead>
+                                        <tr className="bg-gray-50/50">
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-1/2">หัวข้อการประเมิน</th>
+                                            <th className="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">เต็ม</th>
+                                            {[1,2,3,4].map(q => <th key={q} className="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Q{q}</th>)}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200">
+                                    <tbody className="divide-y divide-gray-100">
                                         {SCORE_CATEGORIES.map(cat => (
-                                            <tr key={cat.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.name}</td>
-                                                <td className="px-6 py-4 text-sm text-center text-gray-500 bg-gray-50/50">{cat.max}</td>
+                                            <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-700">{cat.name}</td>
+                                                <td className="px-6 py-4 text-sm text-center font-semibold text-gray-400 bg-gray-50/30">{cat.max}</td>
                                                 {[1,2,3,4].map(q => (
-                                                    <td key={q} className="px-6 py-4 text-sm text-center text-gray-700">{cat.q4Only && q !== 4 ? '-' : getScore(q, cat.id)}</td>
+                                                    <td key={q} className="px-6 py-4 text-sm text-center font-medium text-gray-800">
+                                                        {cat.q4Only && q !== 4 ? <span className="text-gray-200">-</span> : (typeof getScore(q, cat.id) === 'number' ? fmt(getScore(q, cat.id)) : getScore(q, cat.id))}
+                                                    </td>
                                                 ))}
                                             </tr>
                                         ))}
-                                        <tr className="bg-blue-50/50 font-bold text-blue-900">
-                                            <td className="px-6 py-4">คะแนนรวม</td>
-                                            <td className="px-6 py-4 text-center">100</td>
-                                            {[1,2,3,4].map(q => <td key={q} className="px-6 py-4 text-center">{getQuarterTotal(q)}</td>)}
+                                        <tr className="bg-ci-lightGreen/50">
+                                            <td className="px-6 py-5 font-bold text-ci-green">คะแนนรวม</td>
+                                            <td className="px-6 py-5 text-center text-gray-300">-</td>
+                                            {[1,2,3,4].map(q => (
+                                                <td key={q} className="px-6 py-5 text-center">
+                                                    <div className="text-lg font-bold text-ci-green">{fmt(getQuarterTotal(q))}</div>
+                                                    <div className="text-[10px] font-bold text-ci-green/50 uppercase">เต็ม {q===4?100:80}</div>
+                                                </td>
+                                            ))}
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         ) : (
-                            <div className="p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">รายละเอียดคะแนน ไตรมาสที่ {selectedQuarter} <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Total: {getQuarterTotal(selectedQuarter)}</span></h3>
-                                    {isAdmin && <button onClick={() => onEditClick(selectedQuarter)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2">แก้ไขคะแนน / คอมเมนต์</button>}
+                            <div className="p-8 animate-fade-in-up">
+                                <div className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">รายละเอียดคะแนน ไตรมาสที่ {selectedQuarter}</h3>
+                                        <div className="text-sm text-gray-500 mt-1">คะแนนรวม: <span className="font-bold text-ci-green">{fmt(getQuarterTotal(selectedQuarter))}</span> / {selectedQuarter===4?100:80}</div>
+                                    </div>
+                                    {isAdmin && divisionName !== 'คะแนนเฉลี่ยทั้งหมด' && (
+                                        <button onClick={() => onEditClick(selectedQuarter)} className="bg-black hover:bg-gray-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-gray-200 transition-all hover:-translate-y-0.5 flex items-center gap-2">
+                                            แก้ไขคะแนน
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                    <div className="lg:col-span-2 space-y-4">
+                                    <div className="lg:col-span-2 space-y-5">
                                         {SCORE_CATEGORIES.map(cat => {
                                             if (cat.q4Only && selectedQuarter !== 4) return null;
                                             const score = getScore(selectedQuarter, cat.id);
                                             const percentage = typeof score === 'number' ? (score / cat.max) * 100 : 0;
                                             return (
-                                                <div key={cat.id} className="bg-gray-50 p-4 rounded-lg">
-                                                    <div className="flex justify-between items-end mb-2"><span className="text-sm font-medium text-gray-700">{cat.name}</span><span className="font-bold text-gray-900">{score} <span className="text-gray-400 text-xs font-normal">/ {cat.max}</span></span></div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2.5"><div className={`h-2.5 rounded-full ${percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`} style={{ width: `${percentage}%` }}></div></div>
+                                                <div key={cat.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex justify-between items-end mb-3">
+                                                        <span className="text-sm font-semibold text-gray-700">{cat.name}</span>
+                                                        <span className="text-lg font-bold text-gray-900">{typeof score === 'number' ? fmt(score) : score} <span className="text-gray-400 text-xs font-medium">/ {cat.max}</span></span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                                        <div className={`h-full rounded-full transition-all duration-1000 ease-out ${percentage >= 80 ? 'bg-gradient-to-r from-ci-green to-emerald-500' : percentage >= 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-gradient-to-r from-ci-red to-rose-500'}`} style={{ width: `${percentage}%` }}></div>
+                                                    </div>
                                                 </div>
                                             )
                                         })}
                                     </div>
-                                    <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-5 h-fit">
-                                        <h4 className="font-semibold text-yellow-800 mb-3 flex items-center gap-2"><Icons.Info className="w-4 h-4" /> สรุปผลและข้อเสนอแนะ</h4>
-                                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{data?.quarters?.[selectedQuarter]?.comment || "ไม่มีข้อมูลคอมเมนต์"}</p>
+                                    <div className="bg-ci-lightRed border border-red-100 rounded-2xl p-6 h-fit relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10"><Icons.Info className="w-20 h-20 text-ci-red" /></div>
+                                        <h4 className="font-bold text-ci-red mb-4 flex items-center gap-2 relative z-10"><Icons.Info className="w-5 h-5" /> สรุปผลและข้อเสนอแนะ</h4>
+                                        <div className="bg-white/60 rounded-xl p-4 text-gray-800 text-sm leading-relaxed whitespace-pre-line relative z-10 min-h-[100px]">
+                                            {data?.quarters?.[selectedQuarter]?.comment || "ยังไม่มีข้อเสนอแนะในไตรมาสนี้"}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -357,87 +380,171 @@
 
         // Dashboard Component
         const Dashboard = ({ currentDivision, allScores, isAdmin, divisionsList }) => {
-            if (!currentDivision || !allScores || Object.keys(allScores).length === 0) return <div className="h-64 flex items-center justify-center text-gray-400">กำลังโหลดข้อมูล...</div>;
+            const [rankingLimit, setRankingLimit] = useState(10);
 
-            const getQuarterlyData = (division) => {
-                const data = allScores[division];
-                return [1, 2, 3, 4].map(q => {
-                    const scores = data?.quarters?.[q]?.scores;
-                    const total = scores ? Object.values(scores).reduce((a, b) => a + b, 0) : 0;
-                    return { name: `Q${q}`, score: total };
+            if (!currentDivision || !allScores) return <div className="h-96 flex items-center justify-center"><Icons.Loader2 className="w-8 h-8 text-ci-green animate-spin" /></div>;
+            
+            const fmt = (num) => parseFloat(num.toFixed(2));
+            const chartData = [1,2,3,4].map(q => {
+                const s = allScores[currentDivision]?.quarters?.[q]?.scores;
+                return { name: `Q${q}`, score: s ? fmt(Object.values(s).reduce((a, b) => a + b, 0)) : 0 };
+            });
+            
+            const cats = [{id:1,n:'แบบฟอร์ม'},{id:2,n:'ความครอบคลุม'},{id:3,n:'เป้าหมาย'},{id:4,n:'ความร่วมมือ'},{id:5,n:'ความสำเร็จ'}];
+            const radarData = cats.map(c => {
+                let sum=0, cnt=0;
+                [1,2,3,4].forEach(q => {
+                    const v = allScores[currentDivision]?.quarters?.[q]?.scores?.[c.id];
+                    if (v !== undefined && (c.id!==5 || q===4)) { sum+=v; cnt++; }
                 });
-            };
-
-            const getRadarData = (division) => {
-                const data = allScores[division];
-                const categories = [
-                    { id: 1, name: 'แบบฟอร์ม' }, { id: 2, name: 'ความครอบคลุม' },
-                    { id: 3, name: 'เป้าหมาย' }, { id: 4, name: 'ความร่วมมือ' },
-                    { id: 5, name: 'ความสำเร็จ' }
-                ];
-                return categories.map(cat => {
-                    let sum = 0, count = 0;
-                    [1,2,3,4].forEach(q => {
-                        const s = data?.quarters?.[q]?.scores?.[cat.id];
-                        if (s !== undefined && (cat.id !== 5 || q === 4)) { sum += s; count++; }
-                    });
-                    return { subject: cat.name, A: count > 0 ? (sum / count) : 0, fullMark: 20 };
-                });
-            };
-
-            const getRankingData = () => {
-                return divisionsList.map(div => {
-                    const dData = allScores[div];
+                return { subject: c.n, A: cnt>0?fmt(sum/cnt):0, fullMark:20 };
+            });
+            const sortedRadar = [...radarData].sort((a,b)=>b.A-a.A);
+            const best = sortedRadar[0], weak = sortedRadar[sortedRadar.length-1];
+            
+            let rankingData = divisionsList
+                .filter(d => d !== "คะแนนเฉลี่ยทั้งหมด")
+                .map(d => {
                     let total = 0;
-                    if (dData) {
-                        [1,2,3,4].forEach(q => {
-                            const scores = dData.quarters?.[q]?.scores;
-                            if (scores) total += Object.values(scores).reduce((a, b) => a + b, 0);
-                        });
-                    }
-                    return { name: div, total: total };
-                }).sort((a, b) => b.total - a.total).slice(0, 10);
+                    [1,2,3,4].forEach(q => {
+                        const s = allScores[d]?.quarters?.[q]?.scores;
+                        if(s) total += Object.values(s).reduce((a,b)=>a+b,0);
+                    });
+                    return { name: d, total: fmt(total) };
+                })
+                .sort((a,b) => b.total - a.total);
+
+            if (rankingLimit > 0) {
+                rankingData = rankingData.slice(0, rankingLimit);
+            }
+
+            const StatCard = ({ title, value, sub, icon: Icon, color }) => (
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{title}</p>
+                            <h3 className={`text-2xl font-bold ${color} group-hover:scale-105 transition-transform origin-left`}>{value}</h3>
+                            {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+                        </div>
+                        <div className={`p-3 rounded-xl ${color.replace('text', 'bg').replace('600', '50').replace('text-ci-', 'bg-ci-').replace('green', 'lightGreen').replace('red', 'lightRed')} ${color} group-hover:rotate-12 transition-transform`}><Icon className="w-6 h-6" /></div>
+                    </div>
+                </div>
+            );
+
+            // Custom Tooltip to fix visibility issues
+            const CustomTooltip = ({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                    const data = payload[0];
+                    const title = label || data.payload.subject || data.name; 
+                    
+                    return (
+                        <div className="bg-white p-3 border border-gray-200 shadow-xl rounded-xl z-50">
+                            <p className="text-sm font-bold text-gray-900 mb-1">{title}</p>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-ci-green"></span>
+                                <p className="text-sm text-ci-green font-bold">
+                                    {typeof data.value === 'number' ? data.value.toFixed(2) : data.value} คะแนน
+                                </p>
+                            </div>
+                        </div>
+                    );
+                }
+                return null;
             };
-
-            const chartData = getQuarterlyData(currentDivision);
-            const radarData = getRadarData(currentDivision);
-            const rankingData = getRankingData();
-
-            // Safety check for Recharts components
-            if (!BarChart) return <div className="p-4 text-red-500">Error: Graphics library failed to load. Please refresh the page.</div>;
 
             return (
-                <div className="space-y-6 animate-fade-in">
-                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2"><span className="bg-blue-600 w-2 h-6 rounded-sm"></span> Dashboard ภาพรวมคะแนน</h2>
+                <div className="space-y-8 animate-fade-in pb-12">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Dashboard ภาพรวม</h2>
+                            <p className="text-gray-500 text-sm mt-1">วิเคราะห์ข้อมูล: <span className="font-semibold text-ci-green">{currentDivision}</span></p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <StatCard title="คะแนนรวมสะสม" value={fmt(chartData.reduce((a,b)=>a+b.score,0))} sub="จากคะแนนเต็ม 340" icon={Icons.TrendingUp} color="text-ci-green" />
+                        <StatCard title="เฉลี่ยต่อไตรมาส" value={fmt(chartData.reduce((a,b)=>a+b.score,0)/4)} sub="คะแนนเฉลี่ย 4 ไตรมาส" icon={Icons.BarChart3} color="text-gray-700" />
+                        <StatCard title="จุดแข็ง (Best Skill)" value={best?.subject||'-'} sub={`${best?.A||0}/20 คะแนน`} icon={Icons.Award} color="text-emerald-600" />
+                        <StatCard title="ควรพัฒนา (Weakness)" value={weak?.subject||'-'} sub={`${weak?.A||0}/20 คะแนน`} icon={Icons.Target} color="text-ci-red" />
+                    </div>
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">แนวโน้มคะแนนรายไตรมาส ({currentDivision})</h3>
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2"><span className="w-1.5 h-6 bg-ci-green rounded-full"></span>แนวโน้มคะแนนรายไตรมาส</h3>
                             <div className="h-72 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="name" /><YAxis domain={[0, 100]} /><Tooltip /><Bar dataKey="score" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} /></BarChart>
+                                    <BarChart data={chartData}>
+                                        <defs>
+                                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#007947" stopOpacity={1}/>
+                                                <stop offset="100%" stopColor="#005833" stopOpacity={0.6}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} domain={[0, 100]} />
+                                        <Tooltip content={<CustomTooltip />} cursor={{fill: 'transparent'}} />
+                                        <Bar dataKey="score" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={40} />
+                                    </BarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">จุดแข็ง / จุดที่ควรพัฒนา</h3>
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2"><span className="w-1.5 h-6 bg-ci-red rounded-full"></span>วิเคราะห์สมรรถนะ (Radar Analysis)</h3>
                             <div className="h-72 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                                        <PolarGrid /><PolarAngleAxis dataKey="subject" tick={{fontSize: 12}} /><PolarRadiusAxis angle={30} domain={[0, 20]} /><Radar name={currentDivision} dataKey="A" stroke="#2563eb" fill="#3b82f6" fillOpacity={0.4} /><Tooltip />
+                                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                                        <PolarGrid stroke="#e2e8f0" />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} />
+                                        <PolarRadiusAxis angle={30} domain={[0, 20]} tick={false} axisLine={false} />
+                                        <Radar name={currentDivision} dataKey="A" stroke="#E30613" strokeWidth={3} fill="#E30613" fillOpacity={0.2} />
+                                        <Tooltip content={<CustomTooltip />} />
                                     </RadarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
                     </div>
+
                     {isAdmin && (
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
-                            <h3 className="text-lg font-bold text-gray-800 mb-6">🏆 อันดับคะแนนรวมสูงสุด (Top 10)</h3>
-                            <div className="h-80 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart layout="vertical" data={rankingData} margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={180} tick={{fontSize: 12}} /><Tooltip /><Bar dataKey="total" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                        <div className="bg-gray-900 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-8 opacity-10"><Icons.Award className="w-32 h-32 text-white" /></div>
+                            <div className="relative z-10">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-2">🏆 Top Performance Ranking</h3>
+                                        <p className="text-gray-400 text-sm">จัดอันดับหน่วยงานที่มีคะแนนรวมสูงสุด</p>
+                                    </div>
+                                    <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
+                                        {[3, 10, 0].map(limit => (
+                                            <button 
+                                                key={limit}
+                                                onClick={() => setRankingLimit(limit)}
+                                                className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${rankingLimit === limit ? 'bg-ci-green text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
+                                            >
+                                                {limit === 0 ? 'ทุกฝ่าย' : `Top ${limit}`}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                                    {rankingData.map((item, idx) => (
+                                        <div key={item.name} className="flex items-center gap-4 group">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${idx===0?'bg-yellow-400 text-yellow-900':idx===1?'bg-gray-300 text-gray-800':idx===2?'bg-orange-400 text-orange-900':'bg-gray-700 text-gray-300'}`}>
+                                                {idx+1}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between text-sm mb-1">
+                                                    <span className="font-medium text-gray-200">{item.name}</span>
+                                                    <span className="font-bold">{item.total}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                                                    <div className={`h-full rounded-full ${idx===0?'bg-yellow-400':idx===1?'bg-gray-300':idx===2?'bg-orange-400':'bg-ci-green'}`} style={{width: `${(item.total/340)*100}%`}}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -459,48 +566,45 @@
                 }
             }, [isOpen, initialData, quarter]);
 
-            if (!isOpen) return null;
-
             const handleSubmit = async (e) => {
-                e.preventDefault();
-                setIsSaving(true);
+                e.preventDefault(); setIsSaving(true);
                 await onSave(scores, comment);
-                setIsSaving(false);
-                onClose();
+                setIsSaving(false); onClose();
             };
 
             const labels = {1:'การใช้แบบฟอร์ม', 2:'ความครอบคลุม', 3:'เป้าหมาย', 4:'ความร่วมมือ', 5:'ความสำเร็จ(Q4)'};
 
+            if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fade-in">
-                        <div className="bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                            <div><h3 className="text-lg font-bold">แก้ไขคะแนน</h3><p className="text-sm text-gray-600">{divisionName} - Q{quarter}</p></div>
-                            <button onClick={onClose}><Icons.X className="w-5 h-5 text-gray-500" /></button>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fade-in-up">
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                            <div><h3 className="text-lg font-bold text-gray-800">แก้ไขคะแนน</h3><p className="text-sm text-gray-500">{divisionName} — Q{quarter}</p></div>
+                            <button onClick={onClose}><Icons.X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                             <div className="space-y-4">
                                 {[1,2,3,4].map(id => (
-                                    <div key={id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg">
-                                        <label className="text-sm font-medium text-gray-700 flex-1">{id}. {labels[id]} (20)</label>
-                                        <input type="number" min="0" max="20" value={scores[id] || ''} onChange={(e) => setScores({...scores, [id]: parseInt(e.target.value) || 0})} className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    <div key={id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                        <label className="text-sm font-semibold text-gray-700">{id}. {labels[id]}</label>
+                                        <input type="number" step="0.01" min="0" max="20" value={scores[id]||''} onChange={(e)=>setScores({...scores, [id]: parseFloat(e.target.value)||0})} className="w-24 px-3 py-2 border border-gray-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-ci-green outline-none" />
                                     </div>
                                 ))}
-                                {quarter === 4 && (
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                                        <label className="text-sm font-medium text-blue-900 flex-1">5. {labels[5]} (20)</label>
-                                        <input type="number" min="0" max="20" value={scores[5] || ''} onChange={(e) => setScores({...scores, 5: parseInt(e.target.value) || 0})} className="w-full sm:w-24 px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
+                                {quarter===4 && (
+                                    <div className="flex items-center justify-between p-3 bg-ci-lightGreen rounded-xl border border-ci-green/30">
+                                        <label className="text-sm font-semibold text-ci-green">5. {labels[5]}</label>
+                                        <input type="number" step="0.01" min="0" max="20" value={scores[5]||''} onChange={(e)=>setScores({...scores, 5: parseFloat(e.target.value)||0})} className="w-24 px-3 py-2 border border-ci-green rounded-lg text-right font-bold text-ci-green focus:ring-2 focus:ring-ci-green outline-none" />
                                     </div>
                                 )}
-                                <div className="pt-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">ข้อเสนอแนะ</label>
-                                    <textarea rows={4} value={comment} onChange={(e) => setComment(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none" placeholder="กรอกความคิดเห็น..."></textarea>
+                                <div className="mt-4">
+                                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">ข้อเสนอแนะ</label>
+                                    <textarea rows={4} value={comment} onChange={(e)=>setComment(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ci-green outline-none resize-none text-sm" placeholder="ระบุข้อคิดเห็น..."></textarea>
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg">ยกเลิก</button>
-                                <button type="submit" disabled={isSaving} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                                    {isSaving ? 'กำลังบันทึก...' : <><Icons.Save className="w-4 h-4" /> บันทึก</>}
+                                <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">ยกเลิก</button>
+                                <button type="submit" disabled={isSaving} className="px-5 py-2.5 text-sm font-semibold text-white bg-ci-green hover:bg-ci-darkGreen rounded-xl shadow-lg shadow-ci-green/20 flex items-center gap-2">
+                                    {isSaving ? 'บันทึก...' : <><Icons.Save className="w-4 h-4" /> บันทึกข้อมูล</>}
                                 </button>
                             </div>
                         </form>
@@ -526,11 +630,30 @@
                     setIsLoading(true);
                     const loadData = async () => {
                         try {
-                            const divs = await api.getDivisions();
-                            setDivisions(divs);
+                            let divs = await api.getDivisions();
                             const divToLoad = user.isAdmin ? 'all' : user.division;
-                            const data = await api.getScores(divToLoad);
-                            setScores(data);
+                            let data = await api.getScores(divToLoad);
+
+                            if (user.isAdmin) {
+                                const avgName = "คะแนนเฉลี่ยทั้งหมด";
+                                const avgData = { quarters: {} };
+                                for (let q = 1; q <= 4; q++) {
+                                    let count = 0;
+                                    const sums = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                                    Object.values(data).forEach(d => {
+                                         if (d.quarters?.[q]) { count++; for(let c=1; c<=5; c++) sums[c] += (d.quarters[q].scores[c] || 0); }
+                                    });
+                                    if (count > 0) {
+                                        avgData.quarters[q] = {
+                                            scores: { 1: sums[1]/count, 2: sums[2]/count, 3: sums[3]/count, 4: sums[4]/count, 5: sums[5]/count },
+                                            comment: `ค่าเฉลี่ยจาก ${count} หน่วยงาน`
+                                        };
+                                    }
+                                }
+                                divs = [avgName, ...divs];
+                                data = { [avgName]: avgData, ...data };
+                            }
+                            setDivisions(divs); setScores(data);
                             setSelectedDivision(user.isAdmin && divs.length > 0 ? divs[0] : user.division);
                         } catch (err) { console.error(err); setError("Failed to load data"); } 
                         finally { setIsLoading(false); }
@@ -543,13 +666,9 @@
                 setIsLoading(true); setError(null);
                 try {
                     const loggedInUser = await api.login(creds);
-                    if (loggedInUser) {
-                        setUser(loggedInUser);
-                        if (!loggedInUser.isAdmin) setSelectedDivision(loggedInUser.division);
-                    } else setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-                } catch (e) { 
-                    setError(e.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ'); 
-                } 
+                    if (loggedInUser) { setUser(loggedInUser); if (!loggedInUser.isAdmin) setSelectedDivision(loggedInUser.division); } 
+                    else setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+                } catch (e) { setError(e.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ'); } 
                 finally { setIsLoading(false); }
             };
 
@@ -566,14 +685,7 @@
             return (
                 <Layout user={user} onLogout={() => { setUser(null); setScores({}); }} activeTab={activeTab} setActiveTab={setActiveTab}>
                     {activeTab === 'details' ? (
-                        <ScoreView 
-                            divisionName={selectedDivision} 
-                            data={scores[selectedDivision]} 
-                            isAdmin={user.isAdmin} 
-                            divisionsList={divisions} 
-                            onChangeDivision={setSelectedDivision} 
-                            onEditClick={(q) => { setEditQuarter(q); setIsEditModalOpen(true); }} 
-                        />
+                        <ScoreView divisionName={selectedDivision} data={scores[selectedDivision]} isAdmin={user.isAdmin} divisionsList={divisions} onChangeDivision={setSelectedDivision} onEditClick={(q) => { setEditQuarter(q); setIsEditModalOpen(true); }} />
                     ) : (
                         <Dashboard currentDivision={selectedDivision} allScores={scores} isAdmin={user.isAdmin} divisionsList={divisions} />
                     )}

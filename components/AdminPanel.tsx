@@ -36,8 +36,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   if (!isOpen) return null;
 
   const handleScoreChange = (cat: number, val: string) => {
-      const num = parseInt(val) || 0;
-      setScores(prev => ({ ...prev, [cat]: Math.min(20, Math.max(0, num)) })); // Clamp 0-20
+      // Use parseFloat to allow decimals, fallback to 0
+      const num = parseFloat(val);
+      // If val is empty string, we might want to allow it temporarily for typing, 
+      // but here we just handle valid numbers. 
+      // Ideally, controlled inputs with local string state are better for decimals,
+      // but for simplicity we assume valid number or 0.
+      const safeNum = isNaN(num) ? 0 : num;
+      
+      setScores(prev => ({ ...prev, [cat]: Math.min(20, Math.max(0, safeNum)) })); // Clamp 0-20
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,6 +79,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </label>
                         <input 
                             type="number" 
+                            step="0.01"
                             min="0" max="20"
                             value={scores[id as 1|2|3|4] || ''}
                             onChange={(e) => handleScoreChange(id, e.target.value)}
@@ -88,6 +96,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </label>
                         <input 
                             type="number" 
+                            step="0.01"
                             min="0" max="20"
                             value={scores[5] || ''}
                             onChange={(e) => handleScoreChange(5, e.target.value)}
