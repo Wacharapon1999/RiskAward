@@ -1,13 +1,12 @@
-
 /** @jsx React.createElement */
 /** @jsxFrag React.Fragment */
 import React, { useState } from 'react';
 import { AllScores } from '../types';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, Cell
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { TrendingUp, Award, Target, AlertCircle, BarChart3, PieChart, Filter } from 'lucide-react';
+import { TrendingUp, Award, Target, BarChart3, PieChart, Loader2 } from 'lucide-react';
 
 interface DashboardProps {
   currentDivision: string;
@@ -19,339 +18,216 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ currentDivision, allScores, isAdmin, divisionsList }) => {
   const [rankingLimit, setRankingLimit] = useState<number>(10);
   
-  // Loading State
   if (!currentDivision || !allScores) {
       return (
-          <div className="flex flex-col items-center justify-center h-96 bg-white/50 rounded-3xl border border-gray-100 backdrop-blur-sm animate-pulse">
-              <div className="w-12 h-12 bg-blue-100 rounded-full mb-4"></div>
-              <span className="text-gray-400 font-medium">กำลังประมวลผลข้อมูล...</span>
+          <div className="h-96 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           </div>
       );
   }
 
-  // Helper: Format number
   const fmt = (num: number) => parseFloat(num.toFixed(2));
 
-  // --- DATA PROCESSING ---
+  // --- DATA PREP ---
+  const chartData = [1,2,3,4].map(q => {
+      const s = allScores[currentDivision]?.quarters?.[q]?.scores;
+      let total = 0;
+      if (s) total = (Object.values(s) as number[]).reduce((a, b) => a + b, 0);
+      return { name: `Q${q}`, score: fmt(total) };
+  });
 
-  // 1. Quarterly Data
-  const getQuarterlyData = (division: string) => {
-    const data = allScores[division];
-    const quarters = [1, 2, 3, 4];
-    return quarters.map(q => {
-       const scores = data?.quarters?.[q]?.scores;
-       let total = 0;
-       if (scores) {
-         total = (Object.values(scores) as number[]).reduce((a, b) => a + b, 0);
-       }
-       return { name: `ไตรมาส ${q}`, short: `Q${q}`, score: fmt(total) };
-    });
-  };
+  const categories = [
+      {id:1,n:'แบบฟอร์ม'},{id:2,n:'ความครอบคลุม'},{id:3,n:'เป้าหมาย'},{id:4,n:'ความร่วมมือ'},{id:5,n:'ความสำเร็จ'}
+  ];
+  const radarData = categories.map(c => {
+      let sum=0, cnt=0;
+      [1,2,3,4].forEach(q => {
+          const v = allScores[currentDivision]?.quarters?.[q]?.scores?.[c.id as 1|2|3|4|5];
+          if (v !== undefined && (c.id!==5 || q===4)) { sum+=v; cnt++; }
+      });
+      return { subject: c.n, A: cnt>0?fmt(sum/cnt):0, fullMark:20 };
+  });
+  const sortedRadar = [...radarData].sort((a,b)=>b.A-a.A);
+  const best = sortedRadar[0];
+  const weak = sortedRadar[sortedRadar.length-1];
 
-  // 2. Radar & Skill Analysis
-  const getSkillAnalysis = (division: string) => {
-    const data = allScores[division];
-    const categories = [
-        { id: 1, name: 'แบบฟอร์ม', full: 'การใช้แบบฟอร์ม' },
-        { id: 2, name: 'ความครอบคลุม', full: 'ความครอบคลุม' },
-        { id: 3, name: 'เป้าหมายชัดเจน', full: 'ความชัดเจนของเป้าหมาย' },
-        { id: 4, name: 'ความร่วมมือ', full: 'การให้ความร่วมมือ' },
-        { id: 5, name: 'ความสำเร็จ', full: 'ความสำเร็จในการลดความเสี่ยง' },
-    ];
-    
-    const radarData = categories.map(cat => {
-       let sum = 0;
-       let count = 0;
-       [1, 2, 3, 4].forEach(q => {
-          const s = data?.quarters?.[q]?.scores?.[cat.id as 1|2|3|4|5];
-          if (s !== undefined) {
-             if (cat.id !== 5 || q === 4) {
-                 sum += s;
-                 count++;
-             }
-          }
-       });
-       const avg = count > 0 ? sum / count : 0;
-       return { 
-           subject: cat.name, 
-           full: cat.full,
-           A: fmt(avg), 
-           fullMark: 20 
-       };
-    });
+  let rankingData = divisionsList
+      .filter(d => d !== "คะแนนเฉลี่ยทั้งหมด")
+      .map(d => {
+          let total = 0;
+          let quarters: Record<number, number> = {};
+          [1,2,3,4].forEach(q => {
+              const s = allScores[d]?.quarters?.[q]?.scores;
+              let qTotal = 0;
+              if(s) qTotal = (Object.values(s) as number[]).reduce((a,b)=>a+b,0);
+              quarters[q] = fmt(qTotal);
+              total += qTotal;
+          });
+          return { name: d, total: fmt(total), quarters };
+      })
+      .sort((a,b) => b.total - a.total);
 
-    // Find Best & Weakest
-    const sorted = [...radarData].sort((a, b) => b.A - a.A);
-    const best = sorted[0];
-    const weak = sorted[sorted.length - 1];
+  if (rankingLimit > 0) {
+      rankingData = rankingData.slice(0, rankingLimit);
+  }
 
-    return { radarData, best, weak };
-  };
+  // --- COMPONENTS ---
 
-  // 3. Ranking Data
-  const getRankingData = () => {
-    let data = divisionsList.map(div => {
-        // Skip "Average" in ranking
-        if (div === "คะแนนเฉลี่ยทั้งหมด") return null;
-
-        const dData = allScores[div];
-        let total = 0;
-        if (dData) {
-            [1, 2, 3, 4].forEach(q => {
-                const scores = dData.quarters?.[q]?.scores;
-                if (scores) total += (Object.values(scores) as number[]).reduce((a, b) => a + b, 0);
-            });
-        }
-        return { name: div, total: fmt(total) };
-    })
-    .filter(Boolean) as { name: string; total: number }[];
-
-    // Sort Descending
-    data.sort((a, b) => b.total - a.total);
-
-    // Filter Limit
-    if (rankingLimit > 0) {
-        data = data.slice(0, rankingLimit);
-    }
-
-    return data;
-  };
-
-  const chartData = getQuarterlyData(currentDivision);
-  const { radarData, best, weak } = getSkillAnalysis(currentDivision);
-  const rankingData = getRankingData();
-
-  // Calculate Total KPI
-  const totalScore = chartData.reduce((acc, curr) => acc + curr.score, 0);
-  const averagePerQuarter = totalScore / 4;
-
-  // --- UI COMPONENTS ---
-
-  const StatCard = ({ title, value, subtext, icon: Icon, colorClass, bgClass }: any) => (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
-        <div className="flex items-start justify-between">
-            <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
-                <h3 className={`text-2xl font-bold ${colorClass}`}>{value}</h3>
-                {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
-            </div>
-            <div className={`p-3 rounded-xl ${bgClass}`}>
-                <Icon className={`w-6 h-6 ${colorClass}`} />
-            </div>
-        </div>
-    </div>
+  const StatCard = ({ title, value, sub, icon: Icon, color }: any) => (
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+          <div className="flex justify-between items-start">
+              <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{title}</p>
+                  <h3 className={`text-2xl font-bold ${color} group-hover:scale-105 transition-transform origin-left`}>{value}</h3>
+                  {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+              </div>
+              <div className={`p-3 rounded-xl bg-gray-50 group-hover:bg-opacity-80 transition-colors`}>
+                  <Icon className={`w-6 h-6 ${color}`} />
+              </div>
+          </div>
+      </div>
   );
 
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-100 shadow-xl rounded-xl">
-          <p className="text-sm font-semibold text-gray-800 mb-1">{label}</p>
-          <p className="text-sm text-blue-600 font-bold">
-            {payload[0].value.toFixed(2)} คะแนน
-          </p>
-        </div>
-      );
-    }
-    return null;
+      if (active && payload && payload.length) {
+          return (
+              <div className="bg-white p-3 border border-gray-200 shadow-xl rounded-xl z-50">
+                  <p className="text-sm font-bold text-gray-900 mb-1">{label || payload[0].name}</p>
+                  <p className="text-sm text-blue-600 font-bold">
+                      {typeof payload[0].value === 'number' ? payload[0].value.toFixed(2) : payload[0].value} คะแนน
+                  </p>
+              </div>
+          );
+      }
+      return null;
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-10">
-      
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Dashboard ภาพรวม</h2>
-            <p className="text-gray-500 text-sm">วิเคราะห์ผลการดำเนินงานด้านการจัดการความเสี่ยง</p>
+      <div className="space-y-8 animate-fade-in pb-12">
+          <div className="flex items-center justify-between">
+              <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Dashboard ภาพรวม</h2>
+                  <p className="text-gray-500 text-sm mt-1">วิเคราะห์ข้อมูล: <span className="font-semibold text-blue-600">{currentDivision}</span></p>
+              </div>
           </div>
-          <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium border border-blue-100">
-             หน่วยงาน: <span className="font-bold">{currentDivision}</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              <StatCard title="คะแนนรวมสะสม" value={fmt(chartData.reduce((a,b)=>a+b.score,0))} sub="จากคะแนนเต็ม 340" icon={TrendingUp} color="text-blue-600" />
+              <StatCard title="เฉลี่ยต่อไตรมาส" value={fmt(chartData.reduce((a,b)=>a+b.score,0)/4)} sub="คะแนนเฉลี่ย 4 ไตรมาส" icon={BarChart3} color="text-gray-700" />
+              <StatCard title="จุดแข็ง (Best Skill)" value={best?.subject||'-'} sub={`${best?.A||0}/20 คะแนน`} icon={Award} color="text-emerald-600" />
+              <StatCard title="ควรพัฒนา (Weakness)" value={weak?.subject||'-'} sub={`${weak?.A||0}/20 คะแนน`} icon={Target} color="text-rose-600" />
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                  <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+                      แนวโน้มคะแนนรายไตรมาส
+                  </h3>
+                  <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData}>
+                              <defs>
+                                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="0%" stopColor="#2563eb" stopOpacity={1}/>
+                                      <stop offset="100%" stopColor="#1e40af" stopOpacity={0.6}/>
+                                  </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                              <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} domain={[0, 100]} />
+                              <Tooltip content={<CustomTooltip />} cursor={{fill: 'transparent'}} />
+                              <Bar dataKey="score" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={40} />
+                          </BarChart>
+                      </ResponsiveContainer>
+                  </div>
+              </div>
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                  <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <div className="w-1.5 h-6 bg-rose-500 rounded-full"></div>
+                      วิเคราะห์สมรรถนะ (Radar Analysis)
+                  </h3>
+                  <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                              <PolarGrid stroke="#e2e8f0" />
+                              <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 20]} tick={false} axisLine={false} />
+                              <Radar name={currentDivision} dataKey="A" stroke="#e11d48" strokeWidth={3} fill="#e11d48" fillOpacity={0.2} />
+                              <Tooltip content={<CustomTooltip />} />
+                          </RadarChart>
+                      </ResponsiveContainer>
+                  </div>
+              </div>
+          </div>
+
+          {isAdmin && (
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-5">
+                      <Award className="w-32 h-32 text-gray-900" />
+                  </div>
+                  <div className="relative z-10">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                          <div>
+                              <h3 className="text-2xl font-bold mb-2 text-gray-900 flex items-center gap-2">
+                                  <Award className="w-8 h-8 text-yellow-500" />
+                                  Top Performance Ranking
+                              </h3>
+                              <p className="text-gray-500 text-sm">จัดอันดับหน่วยงานที่มีคะแนนรวมสูงสุดพร้อมรายละเอียด</p>
+                          </div>
+                          <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+                              {[3, 10, 0].map(limit => (
+                                  <button 
+                                      key={limit}
+                                      onClick={() => setRankingLimit(limit)}
+                                      className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${rankingLimit === limit ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`}
+                                  >
+                                      {limit === 0 ? 'ทุกฝ่าย' : `Top ${limit}`}
+                                  </button>
+                              ))}
+                          </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-3 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
+                          {rankingData.map((item, idx) => (
+                              <div key={item.name} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                                      <div className="flex items-center gap-4 flex-1">
+                                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shadow-sm border border-gray-100 shrink-0 ${idx===0?'bg-yellow-100 text-yellow-700':idx===1?'bg-gray-100 text-gray-700':idx===2?'bg-orange-100 text-orange-800':'bg-white text-gray-500'}`}>
+                                              {idx+1}
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                              <div className="font-bold text-gray-800 text-base truncate mb-1">{item.name}</div>
+                                              <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[200px]">
+                                                  <div className={`h-full rounded-full ${idx===0?'bg-yellow-400':idx===1?'bg-gray-400':idx===2?'bg-orange-400':'bg-blue-500'}`} style={{width: `${(item.total/340)*100}%`}}></div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      <div className="flex items-center justify-between sm:justify-end gap-6">
+                                           <div className="text-right shrink-0">
+                                               <div className="text-2xl font-bold text-blue-600 leading-none">{item.total}</div>
+                                               <div className="text-[10px] text-gray-400 font-medium mt-1">คะแนนรวม</div>
+                                           </div>
+                                      </div>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-4 gap-2 pt-3 border-t border-gray-50">
+                                      {[1,2,3,4].map(q => (
+                                          <div key={q} className="flex flex-col items-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+                                              <span className="text-[10px] text-gray-400 uppercase font-semibold mb-1">Q{q}</span>
+                                              <span className={`text-sm font-bold ${q===4 ? 'text-blue-600' : 'text-gray-700'}`}>
+                                                  {item.quarters[q]}
+                                              </span>
+                                              <span className="text-[9px] text-gray-400">/{q===4?100:80}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          )}
       </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard 
-             title="คะแนนรวมสะสม" 
-             value={`${fmt(totalScore)}`} 
-             subtext="จากคะแนนเต็ม 340"
-             icon={TrendingUp} 
-             colorClass="text-blue-600" 
-             bgClass="bg-blue-50"
-          />
-          <StatCard 
-             title="เฉลี่ยต่อไตรมาส" 
-             value={`${fmt(averagePerQuarter)}`} 
-             subtext="คะแนนเฉลี่ย 4 ไตรมาส"
-             icon={BarChart3} 
-             colorClass="text-indigo-600" 
-             bgClass="bg-indigo-50"
-          />
-          <StatCard 
-             title="จุดแข็ง (คะแนนสูงสุด)" 
-             value={best?.subject || '-'} 
-             subtext={`เฉลี่ย ${best?.A || 0}/20 คะแนน`}
-             icon={Award} 
-             colorClass="text-emerald-600" 
-             bgClass="bg-emerald-50"
-          />
-          <StatCard 
-             title="ควรพัฒนา (คะแนนน้อยสุด)" 
-             value={weak?.subject || '-'} 
-             subtext={`เฉลี่ย ${weak?.A || 0}/20 คะแนน`}
-             icon={Target} 
-             colorClass="text-rose-600" 
-             bgClass="bg-rose-50"
-          />
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quarterly Trend */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-           <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                    </div>
-                    แนวโน้มคะแนนรายไตรมาส
-                </h3>
-           </div>
-           <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} barSize={40}>
-                  <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis dataKey="short" axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} domain={[0, 100]} />
-                  <Tooltip content={<CustomTooltip />} cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="score" fill="url(#colorScore)" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-           </div>
-        </div>
-
-        {/* Skill Radar */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-           <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <PieChart className="w-4 h-4 text-purple-600" />
-                    </div>
-                    วิเคราะห์สมรรถนะ (5 ด้าน)
-                </h3>
-           </div>
-           <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
-                  <PolarGrid stroke="#e5e7eb" strokeDasharray="4 4" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#4b5563', fontSize: 12, fontWeight: 500 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 20]} tick={false} axisLine={false} />
-                  <Radar
-                    name={currentDivision}
-                    dataKey="A"
-                    stroke="#8b5cf6"
-                    strokeWidth={3}
-                    fill="#8b5cf6"
-                    fillOpacity={0.2}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                </RadarChart>
-              </ResponsiveContainer>
-           </div>
-        </div>
-      </div>
-
-      {/* Admin Only: Leaderboard */}
-      {isAdmin && (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl shadow-lg text-white">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-yellow-500/20 rounded-2xl">
-                        <Award className="w-8 h-8 text-yellow-400" />
-                    </div>
-                    <div>
-                        <h3 className="text-2xl font-bold">Top Performance Ranking</h3>
-                        <p className="text-gray-400 text-sm">จัดอันดับหน่วยงานที่มีคะแนนรวมสูงสุด</p>
-                    </div>
-                </div>
-                
-                {/* Filter Controls */}
-                <div className="bg-gray-700/50 p-1 rounded-lg flex text-xs font-medium border border-gray-600/50">
-                    <button 
-                        onClick={() => setRankingLimit(3)}
-                        className={`px-3 py-1.5 rounded-md transition-all ${rankingLimit === 3 ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-gray-600'}`}
-                    >
-                        Top 3
-                    </button>
-                    <button 
-                        onClick={() => setRankingLimit(10)}
-                        className={`px-3 py-1.5 rounded-md transition-all ${rankingLimit === 10 ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-gray-600'}`}
-                    >
-                        Top 10
-                    </button>
-                    <button 
-                        onClick={() => setRankingLimit(0)}
-                        className={`px-3 py-1.5 rounded-md transition-all ${rankingLimit === 0 ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-gray-600'}`}
-                    >
-                        ทุกฝ่าย
-                    </button>
-                </div>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-3">
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10 backdrop-blur-md">
-                        <div className="h-[400px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    layout="vertical"
-                                    data={rankingData}
-                                    margin={{ top: 0, right: 20, left: 20, bottom: 0 }}
-                                    barGap={4}
-                                    barSize={24}
-                                >
-                                    <XAxis type="number" hide domain={[0, 340]} />
-                                    <YAxis 
-                                        type="category" 
-                                        dataKey="name" 
-                                        width={180} 
-                                        tick={{fill: '#d1d5db', fontSize: 13}} 
-                                        axisLine={false}
-                                        tickLine={false}
-                                        interval={0}
-                                    />
-                                    <Tooltip 
-                                        cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                                        contentStyle={{backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff'}}
-                                    />
-                                    <Bar dataKey="total" radius={[0, 4, 4, 0]}>
-                                        {rankingData.map((entry, index) => (
-                                            <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={
-                                                    index === 0 ? '#fbbf24' : // Gold
-                                                    index === 1 ? '#94a3b8' : // Silver
-                                                    index === 2 ? '#b45309' : // Bronze
-                                                    '#3b82f6' // Others
-                                                } 
-                                            />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-      )}
-    </div>
   );
 };
