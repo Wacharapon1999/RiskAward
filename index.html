@@ -402,15 +402,20 @@
             const sortedRadar = [...radarData].sort((a,b)=>b.A-a.A);
             const best = sortedRadar[0], weak = sortedRadar[sortedRadar.length-1];
             
+            // Calculate Ranking Data with Quarter details
             let rankingData = divisionsList
                 .filter(d => d !== "คะแนนเฉลี่ยทั้งหมด")
                 .map(d => {
                     let total = 0;
+                    let quarters = {};
                     [1,2,3,4].forEach(q => {
                         const s = allScores[d]?.quarters?.[q]?.scores;
-                        if(s) total += Object.values(s).reduce((a,b)=>a+b,0);
+                        let qTotal = 0;
+                        if(s) qTotal = Object.values(s).reduce((a,b)=>a+b,0);
+                        quarters[q] = fmt(qTotal);
+                        total += qTotal;
                     });
-                    return { name: d, total: fmt(total) };
+                    return { name: d, total: fmt(total), quarters };
                 })
                 .sort((a,b) => b.total - a.total);
 
@@ -512,7 +517,7 @@
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                                     <div>
                                         <h3 className="text-2xl font-bold mb-2">🏆 Top Performance Ranking</h3>
-                                        <p className="text-gray-400 text-sm">จัดอันดับหน่วยงานที่มีคะแนนรวมสูงสุด</p>
+                                        <p className="text-gray-400 text-sm">จัดอันดับหน่วยงานที่มีคะแนนรวมสูงสุดพร้อมรายละเอียด</p>
                                     </div>
                                     <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
                                         {[3, 10, 0].map(limit => (
@@ -527,20 +532,39 @@
                                     </div>
                                 </div>
                                 
-                                <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                                <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
                                     {rankingData.map((item, idx) => (
-                                        <div key={item.name} className="flex items-center gap-4 group">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${idx===0?'bg-yellow-400 text-yellow-900':idx===1?'bg-gray-300 text-gray-800':idx===2?'bg-orange-400 text-orange-900':'bg-gray-700 text-gray-300'}`}>
-                                                {idx+1}
+                                        <div key={item.name} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:bg-gray-800 transition-all group">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                                                <div className="flex items-center gap-4 flex-1">
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shadow-lg shrink-0 ${idx===0?'bg-yellow-400 text-yellow-900':idx===1?'bg-gray-300 text-gray-800':idx===2?'bg-orange-400 text-orange-900':'bg-gray-700 text-gray-300'}`}>
+                                                        {idx+1}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-bold text-gray-100 text-base truncate mb-1">{item.name}</div>
+                                                        <div className="w-full bg-gray-700 rounded-full h-1.5 max-w-[200px]">
+                                                            <div className={`h-full rounded-full ${idx===0?'bg-yellow-400':idx===1?'bg-gray-300':idx===2?'bg-orange-400':'bg-ci-green'}`} style={{width: `${(item.total/340)*100}%`}}></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between sm:justify-end gap-6">
+                                                     <div className="text-right shrink-0">
+                                                         <div className="text-2xl font-bold text-ci-green leading-none">{item.total}</div>
+                                                         <div className="text-[10px] text-gray-500 font-medium mt-1">คะแนนรวม</div>
+                                                     </div>
+                                                </div>
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="flex justify-between text-sm mb-1">
-                                                    <span className="font-medium text-gray-200">{item.name}</span>
-                                                    <span className="font-bold">{item.total}</span>
-                                                </div>
-                                                <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                                                    <div className={`h-full rounded-full ${idx===0?'bg-yellow-400':idx===1?'bg-gray-300':idx===2?'bg-orange-400':'bg-ci-green'}`} style={{width: `${(item.total/340)*100}%`}}></div>
-                                                </div>
+                                            
+                                            <div className="grid grid-cols-4 gap-2 pt-3 border-t border-white/5">
+                                                {[1,2,3,4].map(q => (
+                                                    <div key={q} className="flex flex-col items-center p-2 rounded-lg bg-gray-900/50 border border-white/5">
+                                                        <span className="text-[10px] text-gray-500 uppercase font-semibold mb-1">Q{q}</span>
+                                                        <span className={`text-sm font-bold ${q===4 ? 'text-blue-300' : 'text-gray-200'}`}>
+                                                            {item.quarters[q]}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-600">/{q===4?100:80}</span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}
